@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('client/app/bower_components/bootstrap/dist/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('client/app/app.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    {% verbatim %}
+        <!-- Add your site or application content here -->
+        <div class="header">
+            <div class="navbar navbar-default" role="navigation">
+                <div class="container">
+                    <div class="navbar-header">
+
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#js-navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+
+                        <a class="navbar-brand" href="#/">Address book</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="js-navbar-collapse" ng-controller="MenuCtrl">
+
+                        <ul class="nav navbar-nav pull-right" ng-hide="isLoggedIn">
+                            <li><a ng-href="/#/signup">Sign up!</a></li>
+                            <li><a ng-href="/#/login">Login</a></li>
+                        </ul>
+                        <div class="btn-group pull-right acc-button" ng-show="isLoggedIn">
+                            <button type="button" class="btn btn-default">{{ username }}</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                    aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a ng-href="/#/dashboard">Dashboard</a></li>
+                                <li><a ng-href="/#/addpost">Add post</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" ng-click="logout()">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div ng-controller="AlertsCtrl">
+                <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="alert.close()">{{ alert.msg }}</alert>
+            </div>
+            <div ng-view=""></div>
+        </div>
+
+        <div class="footer">
+            <div class="container">
+            </div>
+        </div>
+    {% endverbatim %}
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('client/app/bower_components/angular/angular.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-animate/angular-animate.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-cookies/angular-cookies.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-resource/angular-resource.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-route/angular-route.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-sanitize/angular-sanitize.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-touch/angular-touch.js') }}"></script>
+    <script src="{{ asset('client/app/bower_components/angular-bootstrap/ui-bootstrap-tpls.js') }}"></script>
+    <script src="{{ asset('client/app/app.js') }}"></script>
+    <script src="{{ asset('client/app/services.js') }}"></script>
+    <script src="{{ asset('client/app/menu/menu.js') }}"></script>
+    <script src="{{ asset('client/app/login/login.js') }}"></script>
+    <script src="{{ asset('client/app/signup/signup.js') }}"></script>
+    <script src="{{ asset('client/app/main/main.js') }}"></script>
+{% endblock %}
