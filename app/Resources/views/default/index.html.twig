@@ -23,25 +23,21 @@
                         <a class="navbar-brand" href="#/">Address book</a>
                     </div>
                     <div class="collapse navbar-collapse" id="js-navbar-collapse" ng-controller="MenuCtrl">
+                        <ul class="nav navbar-nav navbar-right" ng-show="isLoggedIn">
+                            <li class="dropdown" dropdown>
+                                <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>
+                                    {{ username }} <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#" ng-click="logout()">Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
 
                         <ul class="nav navbar-nav pull-right" ng-hide="isLoggedIn">
                             <li><a ng-href="/#/signup">Sign up!</a></li>
                             <li><a ng-href="/#/login">Login</a></li>
                         </ul>
-                        <div class="btn-group pull-right acc-button" ng-show="isLoggedIn">
-                            <button type="button" class="btn btn-default">{{ username }}</button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                                    aria-expanded="false">
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a ng-href="/#/dashboard">Dashboard</a></li>
-                                <li><a ng-href="/#/addpost">Add post</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#" ng-click="logout()">Logout</a></li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
