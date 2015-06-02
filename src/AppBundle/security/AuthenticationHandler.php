@@ -41,7 +41,7 @@ class AuthenticationHandler implements AuthenticationSuccessHandlerInterface, Au
     public function onAuthenticationSuccess(Request $request, TokenInterface $token) {
         // if AJAX login
         if ($request->isXmlHttpRequest()) {
-            $array = array('type' => 'success', 'data' => $token->getUsername()); // data to return via JSON
+            $array = array('type' => 'success', 'data' => [ 'username' => $token->getUsername()]); // data to return via JSON
             return new JsonResponse($array);            
         } else {// if form login 
             if ($this->session->get('_security.main.target_path')) {
