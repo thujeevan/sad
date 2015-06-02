@@ -4,6 +4,9 @@ parameters:
 #    parameter_name: value
 
 services:
-#    service_name:
-#        class: AppBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    app.security.authentication_handler:
+        class: AppBundle\security\AuthenticationHandler
+        public: false
+        arguments:
+            - @router
+            - @session
