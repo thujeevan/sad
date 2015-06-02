@@ -4,15 +4,15 @@ namespace AppBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class DefaultControllerTest extends WebTestCase
-{
-    public function testIndex()
-    {
+class DefaultControllerTest extends WebTestCase {
+
+    public function testIndex() {
         $client = static::createClient();
 
-        $crawler = $client->request('GET', '/app/example');
+        $crawler = $client->request('GET', '/');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertTrue($crawler->filter('html:contains("Homepage")')->count() > 0);
+        $this->assertTrue($crawler->filter('html:contains("Address book")')->count() > 0);
     }
+
 }
