@@ -5,62 +5,58 @@ angular.module('clientApp.login', ['ngRoute'])
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/login', {
     templateUrl: 'client/app/login/login.html',
-    controller: 'LoginCtrl'
+    controller: 'LoginCtrl',
+    resolve: {
+        authenticated: function($location, userService) {
+            return userService.isAuthenticated().then(function(){
+                $location.path('/');
+            }, function(){
+                return;
+            });
+        }
+    }
   });
 }])
 
 .controller('LoginCtrl', function($scope, userService, $location, $log, $http, alertService) {
-    $scope.isAuthenticated = function() {
-        if (userService.username) {
-            $log.debug(userService.username);
-            $location.path('/');
-        } else {
-            $http.get('/session/isauthenticated')
-                    .error(function() {
-                        $location.path('/login');
-                    })
-                    .success(function(data) {
-                        if (data.hasOwnProperty('success')) {
-                            userService.username = data.success.user;
-                            $location.path('/');
-                        }
-                    });
-        }
-    };
-
-    $scope.isAuthenticated();
+    $scope.user = {};
 
     $scope.login = function() {
-
-        var payload = {
-            email: this.email,
-            password: this.password
+        // early return on simple validation failure
+        if(!($scope.user.email && $scope.user.password)){
+            return;
+        }
+        
+        var req = {
+            method: 'POST',
+            url: '/session/login_check',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            transformRequest: function(obj) {
+                var str = [];
+                for (var p in obj)
+                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                return str.join("&");
+            },
+            data: $scope.user
         };
-
-        $http.post('/session/login', payload)
-                .error(function(data, status) {
-                    if (status === 400) {
-                        angular.forEach(data, function(value, key) {
-                            if (key === 'email' || key === 'password') {
-                                alertService.add('danger', key + ' : ' + value);
-                            } else {
-                                alertService.add('danger', value.message);
-                            }
-                        });
-                    } else if (status === 401) {
-                        alertService.add('danger', 'Invalid login or password!');
-                    } else if (status === 500) {
-                        alertService.add('danger', 'Internal server error!');
-                    } else {
-                        alertService.add('danger', data);
-                    }
-                })
-                .success(function(result) {
-                    $log.debug(result);
-                    if (result.type === 'success') {
-                        userService.username = result.data.username;
-                        $location.path('/');
-                    }
-                });
+        
+        $http(req).error(function(data, status) {
+            if (status === 400) {                
+            } else if (status === 401) {
+                alertService.add('danger', 'Invalid email or password!');
+            } else if (status === 500) {
+                alertService.add('danger', 'Internal server error!');
+            } else {
+                alertService.add('danger', data);
+            }
+        }).success(function(result) {
+            $log.debug(result);
+            if (result.type === 'success') {
+                userService.username = result.data.username;
+                $location.path('/');
+            }
+        });
     };
 });
