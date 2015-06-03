@@ -30,6 +30,10 @@ describe('clientApp.signup module', function() {
     describe('login controller', function() {  
         it('should send signup request to server', function() {
             var controller = createController();
+            $rootScope.user = {
+                email : 'test@email.com',
+                password : '1234'
+            };
             $httpBackend.expectPOST('/session/signup').respond(200, '');
             
             $rootScope.signup();
@@ -38,13 +42,12 @@ describe('clientApp.signup module', function() {
         
         it('should send signup request to server in proper format', function() {
             var controller = createController();
-            $rootScope.email = 'test@email.com';
-            $rootScope.password = '1234';
+            $rootScope.user = {
+                email : 'test@email.com',
+                password : '1234'
+            };
             
-            $httpBackend.expectPOST('/session/signup', {
-                email : $rootScope.email,
-                password : $rootScope.password
-            }).respond(200, { type : 'success', data : { username : $rootScope.email }});
+            $httpBackend.expectPOST('/session/signup', $rootScope.user).respond(200, { type : 'success', data : { username : $rootScope.email }});
             
             $rootScope.signup();
             $httpBackend.flush();
@@ -53,11 +56,12 @@ describe('clientApp.signup module', function() {
         
         it('should populate error messages properly', function() {
             var controller = createController();
+            $rootScope.user = {
+                email : 'test@email.com',
+                password : '1234'
+            };
             
-            $httpBackend.expectPOST('/session/signup', {
-                email : $rootScope.email,
-                password : $rootScope.password
-            }).respond(400, { type : 'falied', reason : 'invalid username or password'});
+            $httpBackend.expectPOST('/session/signup', $rootScope.user ).respond(400, { type : 'falied', reason : 'invalid username or password'});
             
             $rootScope.signup();
             $httpBackend.flush();
