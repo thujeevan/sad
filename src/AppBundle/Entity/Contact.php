@@ -3,12 +3,13 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="contact")
  */
-class Contact {
+class Contact implements JsonSerializable {
 
     /**
      * @ORM\Column(type="integer")
@@ -113,10 +114,10 @@ class Contact {
     /**
      * Set user
      *
-     * @param \AppBundle\Entity\User $user
+     * @param User $user
      * @return Contact
      */
-    public function setUser(\AppBundle\Entity\User $user = null) {
+    public function setUser(User $user = null) {
         $this->user = $user;
 
         return $this;
@@ -125,10 +126,18 @@ class Contact {
     /**
      * Get user
      *
-     * @return \AppBundle\Entity\User 
+     * @return User 
      */
     public function getUser() {
         return $this->user;
     }
-
+    
+    public function jsonSerialize() {
+        return array(
+            'id' => $this->id,
+            'name' => $this->name,
+            'email'=> $this->email,
+            'phone' => $this->phoneNumber
+        );
+    }
 }
