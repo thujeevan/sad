@@ -4,22 +4,66 @@
             <h3 class="panel-title">Contacts</h3>
         </div>
         <div class="list-group">
-            <div class="list-group-item" ng-repeat="contact in contacts">
+            <div class="panel-body">
+                <div class="search-form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search address book..." ng-model="searchTerm">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <form name="create" novalidate class="form-inline pull-right" ng-submit="createNew(create)">
+                                <div ng-class="['form-group', { 'has-error' : create.$submitted && create.cName.$error.required }]">
+                                    <input name="cName" type="text" class="form-control" placeholder="Name" required ng-model="contact.name">
+                                </div>
+                                <div ng-class="['form-group', { 'has-error' : create.$submitted && (create.cEmail.$error.required || create.cEmail.$error.email)}]">
+                                    <input name="cEmail" type="email" class="form-control" placeholder="e-mail" required ng-model="contact.email">
+                                </div>
+                                <div ng-class="['form-group', { 'has-error' : create.$submitted && create.cPhone.$error.required }]">
+                                    <input name="cPhone" type="text" class="form-control" placeholder="Phone number" required ng-model="contact.phone">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add new</button>
+                            </form>  
+                        </div>
+                    </div>			    
+                </div>					
+            </div>
+            <div class="list-group-item" ng-repeat="item in contacts | orderBy:'name'" ng-controller="ContactCtrl">
                 <div class="row">
-                    <div class="col-md-10"><h4 class="list-group-item-heading">{{ contact.name }}</h4></div>
-                    <div class="col-md-2">
-                        <span class="pull-right">
-                            <i class="glyphicon glyphicon-edit"></i> 
-                            <i class="glyphicon glyphicon-remove-circle"></i>
-                        </span>
+                    <div ng-hide="isEditOpen">
+                        <div class="col-md-10">
+                            <h4 class="list-group-item-heading">{{ item.name }}</h4>
+                            <span class="item-detail">
+                                <span class="glyphicon glyphicon-envelope"></span> <span class="list-group-item-text">{{ item.email }}</span>
+                            </span>
+                            <span class="item-detail">
+                                <span class="glyphicon glyphicon-earphone"></span> <span class="list-group-item-text">{{ item.phone }}</span>
+                            </span>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="pull-right">
+                                <button type="button" class="btn btn-sm" ng-click="toggleEdit()"><i class="glyphicon glyphicon-edit"></i> </button>
+                                <button type="button" class="btn btn-sm" ng-click="remove()"><i class="glyphicon glyphicon-remove-circle"></i> </button>
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <span class="text-muted">Email : </span><span class="list-group-item-text">{{ contact.email }}</span>
-                    </div>
-                    <div class="col-md-4">
-                        <span class="text-muted">Phone : </span><span class="list-group-item-text">{{ contact.phone }}</span>
+                    
+                    <div class="col-md-12" ng-show="isEditOpen">
+                        <form name="edit" novalidate class="form-inline" ng-submit="update(edit)">
+                            <div ng-class="['form-group', { 'has-error' : edit.$submitted && edit.cName.$error.required }]">
+                                <input name="cName" type="text" class="form-control" placeholder="Name" required ng-model="item.name">
+                            </div>
+                            <div ng-class="['form-group', { 'has-error' : edit.$submitted && (edit.cEmail.$error.required || edit.cEmail.$error.email)}]">
+                                <input name="cEmail" type="email" class="form-control" placeholder="e-mail" required ng-model="item.email">
+                            </div>
+                            <div ng-class="['form-group', { 'has-error' : edit.$submitted && edit.cPhone.$error.required }]">
+                                <input name="cPhone" type="text" class="form-control" placeholder="Phone number" required ng-model="item.phone">
+                            </div>
+                            <button type="button" class="btn btn-danger" ng-click="toggleEdit()">Cancel</button>
+                            <button type="button" class="btn btn-warning" ng-click="reset(edit)">Reset</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>  
                     </div>
                 </div>
             </div>
