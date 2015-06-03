@@ -9,15 +9,14 @@ angular.module('clientApp.signup', ['ngRoute'])
   });
 }])
 
-.controller('SignupCtrl', function($scope, $http, $log, alertService, $location, userService) {
-
+.controller('SignupCtrl', function($scope, $http, alertService, $location, userService) {
+    $scope.user = {};
     $scope.signup = function() {
-        var payload = {
-            email: $scope.email,
-            password: $scope.password
-        };
+        if(!($scope.user.email && $scope.user.password)){
+            return;
+        }
 
-        $http.post('/session/signup', payload)
+        $http.post('/session/signup', $scope.user)
                 .error(function(result, status) {
                     if (status === 400) {
                         alertService.add('danger', result.reason);
