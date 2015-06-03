@@ -2,13 +2,14 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Serializable;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Table(name="user")
- * @ORM\Entity(repositoryClass="AppBundle\Entity\UserRepository")
+ * @ORM\Entity(repositoryClass="UserRepository")
  */
 class User implements UserInterface, Serializable {
 
@@ -38,11 +39,17 @@ class User implements UserInterface, Serializable {
      * @ORM\Column(name="is_active", type="boolean")
      */
     private $isActive;
+    
+    /**
+     * @ORM\OneToMany(targetEntity="Contact", mappedBy="user")
+     */
+    protected $contacts;
 
     public function __construct() {
         $this->isActive = true;
         // may not be needed, see section on salt below
         // $this->salt = md5(uniqid(null, true));
+        $this->contacts = new ArrayCollection();
     }
 
     public function getUsername() {
@@ -162,6 +169,37 @@ class User implements UserInterface, Serializable {
      */
     public function getIsActive() {
         return $this->isActive;
+    }
+
+
+    /**
+     * Add contacts
+     *
+     * @param \AppBundle\Entity\Contact $contacts
+     * @return User
+     */
+    public function addContact(\AppBundle\Entity\Contact $contacts) {
+        $this->contacts[] = $contacts;
+
+        return $this;
+    }
+
+    /**
+     * Remove contacts
+     *
+     * @param \AppBundle\Entity\Contact $contacts
+     */
+    public function removeContact(\AppBundle\Entity\Contact $contacts) {
+        $this->contacts->removeElement($contacts);
+    }
+
+    /**
+     * Get contacts
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getContacts() {
+        return $this->contacts;
     }
 
 }
