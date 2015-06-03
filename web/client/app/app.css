@@ -1,3 +1,12 @@
 .item-detail {
     padding-right: 15px;
 }
+
+#alert-container {
+    position: absolute;
+    width: auto;
+    left: 0;
+    bottom: 10px;
+    z-index: 99;
+    padding: 15px;
+}
