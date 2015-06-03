@@ -1,23 +1,107 @@
 'use strict';
 
-angular.module('clientApp.main', ['ngRoute'])
+angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function($routeProvider) {
+        $routeProvider.when('/', {
+            templateUrl: 'client/app/main/main.html',
+            controller: 'MainCtrl',
+            resolve: {
+                authenticated: function($q, $location, userService) {
+                    return userService.isAuthenticated().then(null, function() {
+                        $location.path('/login');
+                        return $q.reject();
+                    });
+                }
+            }
+        });
+    }
+]).controller('MainCtrl', function($scope, $http, alertService) {
+    $scope.contacts = [];
+    $scope.master = {};
+    $scope.searchTerm;
 
-.config(['$routeProvider', function($routeProvider) {
-  $routeProvider.when('/', {
-    templateUrl: 'client/app/main/main.html',
-    controller: 'MainCtrl'
-  });
-}])
-
-.controller('MainCtrl', function($scope, $location, $log, $http) {
-    $scope.getBook = function() {
-        $http.get('api/contacts')
-            .success(function(result) {
-              $scope.contacts = result.data;
-            })
-            .error(function() {
-                $location.path('/login');
-            });
+    $scope.makeRequest = function(type, url, data) {
+        return $http[type](url, data);
     };
-    $scope.getBook();      
+
+    $scope.reset = function(form) {
+        $scope.contact = angular.copy($scope.master);
+        if (form) {
+            form.$setPristine();
+        }
+    };
+    $scope.reset();
+
+    $scope.createNew = function(form) {
+        var item = angular.copy($scope.contact);
+        item.id = null;
+
+        if (item.name && item.email && item.phone) {
+            $scope.makeRequest('post', '/api/contacts', item).success(function(result) {
+                $scope.contacts.push(result.data);
+                $scope.reset(form);
+                alertService.add('success', 'Contact item added successfully');
+            }).error(function() {
+                alertService.add('warning', 'Failed to add new entry, please re-try');
+            });
+        }
+    };
+
+    $scope.getBook = function() {
+        $scope.makeRequest('get', '/api/contacts', {}).success(function(result) {
+            if(result.data){
+                $scope.contacts = $scope.contacts.concat(result.data);
+            }
+        }).error(function() {
+            alertService.add('warning', 'Failed to fetch address book, please try again');
+        });
+    };
+
+    $scope.getBook();
+}).controller('ContactCtrl', function($scope, alertService) {
+    $scope.master = angular.copy($scope.item);
+    $scope.isEditOpen = false;
+
+    $scope.reset = function(form) {
+        for (var i in $scope.master) {
+            if ($scope.master.hasOwnProperty(i)) {
+                $scope.item[i] = $scope.master[i];
+            }
+        }
+        if (form) {
+            form.$setPristine();
+        }
+    };
+
+    $scope.update = function(form) {
+        var item = $scope.item;
+
+        if (item.name && item.email && item.phone) {
+            $scope.makeRequest('put', '/api/contact/' + item.id, item).success(function(result) {
+                $scope.toggleEdit();
+                $scope.reset(form);
+                $scope.item = $scope.master = result.data;
+                alertService.add('success', 'Contact item updated successfully');
+            }).error(function(error) {
+                alertService.add('warning', 'Failed to update, please re-check and try again');
+            });
+        }
+    };
+
+    $scope.toggleEdit = function() {
+        $scope.reset();
+        $scope.isEditOpen = !$scope.isEditOpen;
+    };
+
+    $scope.remove = function() {
+        // NOTE: indexOf() works in IE 9+.
+        var index = $scope.contacts.indexOf($scope.item);
+        if (index >= 0) {
+            $scope.makeRequest('delete', '/api/contact/' + $scope.item.id).success(function() {
+                $scope.contacts.splice(index, 1);
+                alertService.add('success', 'Contact item delted successfully');
+            }).error(function(error) {
+                alertService.add('danger', 'Failed to remove, please re-check and try again');
+            });
+        }
+    };
 });
