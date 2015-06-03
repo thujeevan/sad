@@ -21,8 +21,8 @@ module.exports = function(config) {
         'app/services.js',
         'app/menu/**/*.js',
         'app/login/**/*.js',
-        'app/signup/**/*.js'
-//        'app/main/**/*.js'
+        'app/signup/**/*.js',
+        'app/main/**/*.js'
     ],
 
 
