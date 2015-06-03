@@ -2,7 +2,7 @@
 
 describe('clientApp.login module', function() {    
     var user;
-    var $httpBackend, $rootScope, createController, authRequestHandler;
+    var $httpBackend, $rootScope, $q, createController, authRequestHandler;
     
     beforeEach(module('clientApp.login'));
     beforeEach(module('clientApp.services'));
@@ -11,18 +11,15 @@ describe('clientApp.login module', function() {
         // Set up the mock http service responses
         $httpBackend = $injector.get('$httpBackend');
         user = $injector.get('userService');
-        
-        // backend definition common for all tests
-        authRequestHandler = $httpBackend.when('GET', '/session/isauthenticated')
-                .respond(401, {type : 'failed', reason : 'not authenticated'});
 
         // Get hold of a scope (i.e. the root scope)
         $rootScope = $injector.get('$rootScope');
         // The $controller service is used to create instances of controllers
         var $controller = $injector.get('$controller');
+        $q = $injector.get('$q');
 
         createController = function() {
-            return $controller('LoginCtrl', {'$scope': $rootScope});
+            return $controller('LoginCtrl', {'$scope': $rootScope });
         };
     }));
 
@@ -31,24 +28,14 @@ describe('clientApp.login module', function() {
             expect(user.username).to.be.equal('');
         }));
         
-        it('should call backend to check authentication', inject(function($httpBackend) {
-            $httpBackend.expectGET('/session/isauthenticated');
-            var controller = createController();
-            $httpBackend.flush();
-        }));
-        
-        it('should fail authentication', function() {
-            $httpBackend.expectGET('/session/isauthenticated');
-            var controller = createController();
-            $httpBackend.flush();
-            expect(user.username).to.be.equal('');
-        });
-        
         it('should send login request to server', function() {
             var controller = createController();
-            $httpBackend.flush();
+            $rootScope.user = {
+                email : 'test@email.com',
+                password : '1234'
+            };
 
-            $httpBackend.expectPOST('/session/login').respond(200, '');
+            $httpBackend.expectPOST('/session/login_check').respond(200, '');
             
             $rootScope.login();
             $httpBackend.flush();
@@ -57,12 +44,12 @@ describe('clientApp.login module', function() {
         
         it('should send login request to server in proper format', function() {
             var controller = createController();
-            $httpBackend.flush();
+            $rootScope.user = {
+                email : 'test@email.com',
+                password : '1234'
+            };
 
-            $httpBackend.expectPOST('/session/login', {
-                email : controller.email,
-                password : controller.password
-            }).respond(200, { type : 'success', data : { username : 'test' }});
+            $httpBackend.expectPOST('/session/login_check').respond(200, { type : 'success', data : { username : 'test' }});
             
             $rootScope.login();
             $httpBackend.flush();
