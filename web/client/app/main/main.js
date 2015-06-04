@@ -58,20 +58,32 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
 
     $scope.getBook();
 }).controller('ContactCtrl', function($scope, alertService) {
+    // Controller which responsible for each item in the list
+    
+    // savig the initial state of the item
+    // will be used for resetting form
     $scope.master = angular.copy($scope.item);
     $scope.isEditOpen = false;
 
-    $scope.reset = function(form) {
-        for (var i in $scope.master) {
-            if ($scope.master.hasOwnProperty(i)) {
-                $scope.item[i] = $scope.master[i];
+    // function to update properties without destroying object reference
+    function updateItem(source) {
+        for (var i in source) {
+            if (source.hasOwnProperty(i)) {
+                $scope.item[i] = source[i];
             }
         }
+    };
+    
+    // reset the scope item to previous state
+    // reset the form too when passed
+    $scope.reset = function(form) {   
+        updateItem($scope.master);
         if (form) {
             form.$setPristine();
         }
     };
 
+    // function to update the current record
     $scope.update = function(form) {
         var item = $scope.item;
 
@@ -79,7 +91,8 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
             $scope.makeRequest('put', '/api/contact/' + item.id, item).success(function(result) {
                 $scope.toggleEdit();
                 $scope.reset(form);
-                $scope.item = $scope.master = result.data;
+                updateItem(result.data);
+                $scope.master = result.data;
                 alertService.add('success', 'Contact item updated successfully');
             }).error(function(error) {
                 alertService.add('warning', 'Failed to update, please re-check and try again');
@@ -87,21 +100,25 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
         }
     };
 
+    // edit form visibility handler
     $scope.toggleEdit = function() {
         $scope.reset();
         $scope.isEditOpen = !$scope.isEditOpen;
     };
 
+    // current item remove handler
     $scope.remove = function() {
         // NOTE: indexOf() works in IE 9+.
         var index = $scope.contacts.indexOf($scope.item);
         if (index >= 0) {
-            $scope.makeRequest('delete', '/api/contact/' + $scope.item.id).success(function() {
-                $scope.contacts.splice(index, 1);
-                alertService.add('success', 'Contact item delted successfully');
-            }).error(function(error) {
-                alertService.add('danger', 'Failed to remove, please re-check and try again');
-            });
+            if (window.confirm('Do you really want to remove contact :: ' + $scope.item.name + ' ?')) {
+                $scope.makeRequest('delete', '/api/contact/' + $scope.item.id).success(function() {
+                    $scope.contacts.splice(index, 1);
+                    alertService.add('success', 'Contact item deleted successfully');
+                }).error(function(error) {
+                    alertService.add('danger', 'Failed to remove, please re-check and try again');
+                });
+            }
         }
     };
 });
