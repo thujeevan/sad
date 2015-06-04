@@ -18,6 +18,28 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
     $scope.contacts = [];
     $scope.master = {};
     $scope.searchTerm;
+    $scope.loadingContacts = false;
+    
+    // search based on name or phone or email
+    $scope.$watch('searchTerm', function(newVal, oldVal){ 
+        var trimmed = newVal && newVal.trim();
+        
+        if (!(trimmed && (trimmed.split('').length))) {
+            return oldVal;
+        }
+        var req = {
+            method: 'GET',
+            url: '/api/contacts',
+            params : { q : trimmed }
+        };
+        $scope.loadingContacts = true;
+        $http(req).success(function(result) {
+            if(result.data){
+                $scope.contacts = result.data;
+            }
+            $scope.loadingContacts = false;
+        });
+    });
 
     $scope.makeRequest = function(type, url, data) {
         return $http[type](url, data);
@@ -57,7 +79,7 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
     };
 
     $scope.getBook();
-}).controller('ContactCtrl', function($scope, alertService) {
+}).controller('ContactCtrl', function($scope, $window, alertService) {
     // Controller which responsible for each item in the list
     
     // savig the initial state of the item
@@ -111,7 +133,7 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
         // NOTE: indexOf() works in IE 9+.
         var index = $scope.contacts.indexOf($scope.item);
         if (index >= 0) {
-            if (window.confirm('Do you really want to remove contact :: ' + $scope.item.name + ' ?')) {
+            if ($window.confirm('Do you really want to remove contact :: ' + $scope.item.name + ' ?')) {
                 $scope.makeRequest('delete', '/api/contact/' + $scope.item.id).success(function() {
                     $scope.contacts.splice(index, 1);
                     alertService.add('success', 'Contact item deleted successfully');
