@@ -42,7 +42,28 @@ class ApiController extends Controller {
                 return new JsonResponse(['type' => 'failed', 'reason' => 'Error while processing request'], 500);
             }
         } else {
-            // TODO: handle search
+            $q = trim($request->query->get('q', ''));
+            
+            // handle query requests
+            if (strlen($q) > 0) {
+                $repository = $this->getDoctrine()
+                        ->getRepository('AppBundle:Contact');
+                
+                $qb = $repository->createQueryBuilder('c');
+                $query = $qb->select('c.id', 'c.name', 'c.email', 'c.phoneNumber as phone')                        
+                        ->where($qb->expr()->andX(
+                        $qb->expr()->orX(
+                            $qb->expr()->like('c.name', $qb->expr()->literal("%{$q}%")), 
+                            $qb->expr()->like('c.email', $qb->expr()->literal("%{$q}%")), 
+                            $qb->expr()->like('c.phoneNumber', $qb->expr()->literal("%{$q}%"))
+                        ), 'c.user = :user'))
+                        ->setParameter('user', $user)
+                        ->getQuery();
+
+                $contacts = $query->getArrayResult();
+                return new JsonResponse(['type' => 'success', 'data' => $contacts]);
+            }
+            // return full list if query is empty
             return new JsonResponse(['type' => 'success', 'data' => $user->getContacts()->toArray()]);
         }
     }
@@ -99,7 +120,7 @@ class ApiController extends Controller {
             }
         } else if ($request->isMethod('get')) { // handle get request
             return new JsonResponse(['type' => 'success', 'data' => $contact]);
-        } else if ($request->isMethod('delete')) {  // handle get request
+        } else if ($request->isMethod('delete')) {  // handle delete request
             $em->remove($contact);
             try {
                 $em->flush();
