@@ -24,9 +24,10 @@ angular.module('clientApp.main', ['ngRoute']).config(['$routeProvider', function
     $scope.$watch('searchTerm', function(newVal, oldVal){ 
         var trimmed = newVal && newVal.trim();
         
-        if (!(trimmed && (trimmed.split('').length))) {
-            return oldVal;
+        if (!trimmed) {
+            trimmed = '';
         }
+        
         var req = {
             method: 'GET',
             url: '/api/contacts',
