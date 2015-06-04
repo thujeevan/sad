@@ -17,11 +17,12 @@ describe('clientApp.main module', function() {
 
         // Get hold of a scope (i.e. the root scope)
         $rootScope = $injector.get('$rootScope');
+        var windowMock = { confirm: function(msg) { return true } };
         // The $controller service is used to create instances of controllers
         var $controller = $injector.get('$controller');
 
         createController = function(name) {
-            return $controller(name, {'$scope': $rootScope});
+            return $controller(name, {'$scope': $rootScope, $window : windowMock });
         };
     }));
     
@@ -46,10 +47,37 @@ describe('clientApp.main module', function() {
         });
         
         it('should update contacts after resolving to remote data', function(){
-            $httpBackend.expectGET('/api/contacts').respond(200, { type : 'success', data : [{}, {}]});
+            $httpBackend.expectGET('/api/contacts').respond(200, { type : 'success', data : [{id : 1}, { id : 2}]});
             var controller = createController('MainCtrl');
             $httpBackend.flush();
             expect($rootScope.contacts.length).to.be.equal(2);  
+        });
+    });
+    
+    describe('main controller search book', function() {
+        it('should not make search request if term is empty', function(){
+            var controller = createController('MainCtrl'); 
+            $httpBackend.flush();
+            
+            $rootScope.searchTerm = null; 
+            $rootScope.$apply();           
+            expect($rootScope.loadingContacts).to.be.false;
+        });
+        
+        it('should call api for filtered address books when have valid search term', function(){
+            var controller = createController('MainCtrl'); 
+            $httpBackend.flush();
+            
+            var term = 'test';
+            $httpBackend.expectGET('/api/contacts?q='+term).respond(200, { type : 'success', data : [{id : 1}, { id : 2}]});            
+            $rootScope.searchTerm = term;
+            $rootScope.$apply();
+            
+            expect($rootScope.loadingContacts).to.be.true;
+            $httpBackend.flush();
+            
+            expect($rootScope.loadingContacts).to.be.false;
+            expect($rootScope.contacts.length).to.be.equal(2); 
         });
     });
     
