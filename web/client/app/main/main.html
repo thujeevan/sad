@@ -1,7 +1,7 @@
 <div class="col-md-12">
     <div class="panel panel-default" >
         <div class="panel-heading">
-            <h3 class="panel-title">Contacts</h3>
+            <h3 class="panel-title">Contacts in your address book</h3>
         </div>
         <div class="list-group">
             <div class="panel-body">
@@ -9,7 +9,8 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search address book..." ng-model="searchTerm">
+                                <input type="text" class="form-control" placeholder="Search address book by name/email/phone" ng-model="searchTerm" ng-model-options="{ updateOn: 'default blur', debounce: { default: 300, blur: 0 } }">
+                                <i ng-show="loadingContacts" class="glyphicon glyphicon-refresh"></i>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -52,7 +53,7 @@
                     <div class="col-md-12" ng-show="isEditOpen">
                         <form name="edit" novalidate class="form-inline" ng-submit="update(edit)">
                             <div ng-class="['form-group', { 'has-error' : edit.$submitted && edit.cName.$error.required }]">
-                                <input name="cName" type="text" class="form-control" placeholder="Name" required ng-model="item.name">
+                                <input name="cName" type="text" class="form-control" placeholder="Name" required ng-model="item.name" ng-model-options="{ updateOn: 'blur' }">
                             </div>
                             <div ng-class="['form-group', { 'has-error' : edit.$submitted && (edit.cEmail.$error.required || edit.cEmail.$error.email)}]">
                                 <input name="cEmail" type="email" class="form-control" placeholder="e-mail" required ng-model="item.email">

@@ -10,3 +10,9 @@
     z-index: 99;
     padding: 15px;
 }
+
+.form-group .glyphicon.glyphicon-refresh {
+    position: absolute;
+    right: 25px;
+    top: 10px;
+}
