@@ -91,6 +91,80 @@ class ApiControllerTest extends WebTestCase {
         $em->flush();
     }
     
+    public function testContactsSearch() {
+        $client = static::createClient();
+        $container = $client->getContainer();
+        
+        // signup implicitly logging in user
+        $crawler = $client->request(
+                'POST', '/session/signup', array(), array(), array('CONTENT_TYPE' => 'application/json'), '{"email":"another@email.com", "password" : "1234"}'
+        );
+        
+        $crawler = $client->request('GET', '/api/contacts');
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), TRUE);
+        
+        $this->assertEquals($response['type'], 'success');
+        $this->assertEquals(count($response['data']), 0);
+        
+        $em = $container->get('doctrine')->getManager();
+        
+        $crawler = $client->request('POST', '/api/contacts', array(), array(), 
+                array('CONTENT_TYPE' => 'application/json'), 
+                '{"name" : "sample", "email":"another@email.com", "phone" : "12345678"}'
+            );
+        
+        $crawler = $client->request('POST', '/api/contacts', array(), array(), 
+                array('CONTENT_TYPE' => 'application/json'), 
+                '{"name" : "another", "email":"another@email.com", "phone" : "0779876543"}'
+            );
+        
+        $crawler = $client->request('POST', '/api/contacts', array(), array(), 
+                array('CONTENT_TYPE' => 'application/json'), 
+                '{"name" : "zalpha", "email":"zalpha@email.com", "phone" : "0771234567"}'
+            );
+        
+        $crawler = $client->request('GET', '/api/contacts');
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), TRUE);
+        
+        $this->assertEquals($response['type'], 'success');
+        $this->assertEquals(count($response['data']), 3);
+        
+        $crawler = $client->request('GET', '/api/contacts?q=sample');
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), TRUE);
+        
+        $this->assertEquals($response['type'], 'success');
+        $this->assertEquals(count($response['data']), 1);
+        
+        $crawler = $client->request('GET', '/api/contacts?q=another');
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), TRUE);
+        
+        $this->assertEquals($response['type'], 'success');
+        $this->assertEquals(count($response['data']), 2);
+        
+        $crawler = $client->request('GET', '/api/contacts?q=678');
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), TRUE);
+        
+        $this->assertEquals($response['type'], 'success');
+        $this->assertEquals(count($response['data']), 1);
+        
+        $em = $container->get('doctrine')->getManager();
+        
+        // removed created user for test consistency 
+        $user = $em->getRepository('AppBundle:User')->loadUserByUsername('another@email.com');
+        $em->remove($user);
+        $em->flush();
+    }
+    
     public function testContactWithoutAuthentication() {
         $client = static::createClient();
         
